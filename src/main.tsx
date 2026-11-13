@@ -20,21 +20,29 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ConnectKitProvider } from 'connectkit'
 import { Toaster } from 'sonner'
 import { config } from './config'
+import { useTheme } from './hooks/useTheme'
 import App from './App'
 import './index.css'
 
 const queryClient = new QueryClient()
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+function Root() {
+  const { theme } = useTheme()
+  return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        <ConnectKitProvider>
+        <ConnectKitProvider mode={theme}>
           <App />
-          <Toaster position="top-center" />
+          <Toaster position="top-center" theme={theme} />
         </ConnectKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
+  )
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <Root />
   </StrictMode>,
 )
 

@@ -1,10 +1,26 @@
-import { defineConfig } from 'vite'
+import { readFileSync } from 'node:fs'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
+// The Arc Studio preview proxy re-serialises query strings, turning `?raw` into
+// `?raw=`, which Vite's built-in raw loader does not match. Accept both forms.
+function markdownRaw(): Plugin {
+  return {
+    name: 'markdown-raw',
+    enforce: 'pre',
+    load(id) {
+      const [file, query = ''] = id.split('?')
+      if (!file.endsWith('.md') || !/(^|&)raw(=|&|$)/.test(query)) return null
+      this.addWatchFile(file)
+      return `export default ${JSON.stringify(readFileSync(file, 'utf-8'))}`
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), nodePolyfills()],
+  plugins: [markdownRaw(), react(), nodePolyfills()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

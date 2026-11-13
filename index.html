@@ -7,6 +7,23 @@
     <title>Spendry — Agent Spend Intelligence</title>
     <meta name="description" content="Programmable USDC budgets for AI agents — enforce spend policies onchain, audit every transaction." />
     <meta name="theme-color" content="#0d1b2f" />
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      (function () {
+        var t = "dark";
+        try {
+          var s = localStorage.getItem("spendry-theme");
+          if (s === "light" || s === "dark") t = s;
+        } catch (e) {}
+        var r = document.documentElement;
+        r.dataset.theme = t;
+        r.style.colorScheme = t;
+        if (t === "light") {
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute("content", "#f6f4ef");
+        }
+      })();
+    </script>
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.svg" />

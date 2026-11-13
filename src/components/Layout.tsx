@@ -9,6 +9,8 @@ import { cn, formatAddress } from "@/lib/utils";
 import { isPlainClick, navigate } from "@/lib/nav";
 import { Footer } from "./Footer";
 import { SpendryLogo } from "./SpendryLogo";
+import { ThemeToggle } from "./ThemeToggle";
+import { useTheme } from "@/hooks/useTheme";
 
 const CHAIN_ID = 5042002;
 
@@ -30,6 +32,7 @@ const nav: { id: View; label: string; icon: React.ElementType }[] = [
 export function Layout({ view, onView, children }: LayoutProps) {
   const { isConnected, address, chainId } = useAccount();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme } = useTheme();
   const wrongChain = isConnected && chainId !== CHAIN_ID;
 
   return (
@@ -42,7 +45,7 @@ export function Layout({ view, onView, children }: LayoutProps) {
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}
         style={{
-          background: "rgba(10,18,36,0.92)",
+          background: "var(--sidebar-bg)",
           backdropFilter: "blur(24px)",
           borderColor: "var(--border)",
         }}
@@ -68,11 +71,11 @@ export function Layout({ view, onView, children }: LayoutProps) {
               onClick={() => { onView(id); setMobileOpen(false); }}
               className={cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                "hover:bg-white/[0.06]"
+                "hover:bg-[var(--hover)]"
               )}
               style={{
                 color: view === id ? "var(--accent)" : "var(--muted)",
-                background: view === id ? "rgba(172,198,233,0.08)" : "transparent",
+                background: view === id ? "var(--tint-accent)" : "transparent",
               }}
             >
               <Icon className="size-4 shrink-0" />
@@ -89,7 +92,7 @@ export function Layout({ view, onView, children }: LayoutProps) {
               e.preventDefault();
               navigate("/docs");
             }}
-            className="mt-3 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+            className="mt-3 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-[var(--hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
             style={{ color: "var(--muted)" }}
           >
             <BookOpen className="size-4 shrink-0" />
@@ -139,8 +142,8 @@ export function Layout({ view, onView, children }: LayoutProps) {
           <div
             className="flex items-center gap-2 px-4 py-2 text-xs font-medium"
             style={{
-              background: "rgba(251,146,60,0.10)",
-              borderBottom: "1px solid rgba(251,146,60,0.20)",
+              background: "var(--tint-warning)",
+              borderBottom: "1px solid var(--tint-warning-border)",
               color: "var(--warning)",
             }}
           >
@@ -153,13 +156,13 @@ export function Layout({ view, onView, children }: LayoutProps) {
         <header
           className="sticky top-0 z-20 flex items-center gap-3 px-4 sm:px-6 py-3 border-b"
           style={{
-            background: "rgba(13,27,47,0.88)",
+            background: "var(--topbar-bg)",
             backdropFilter: "blur(20px)",
             borderColor: "var(--border)",
           }}
         >
           <button
-            className="lg:hidden p-1.5 rounded-lg transition-colors hover:bg-white/[0.06]"
+            className="lg:hidden p-1.5 rounded-lg transition-colors hover:bg-[var(--hover)]"
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
             style={{ color: "var(--muted)" }}
@@ -177,8 +180,8 @@ export function Layout({ view, onView, children }: LayoutProps) {
             <div
               className="hidden sm:flex lg:hidden items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
               style={{
-                background: wrongChain ? "rgba(251,146,60,0.10)" : "rgba(141,216,159,0.08)",
-                border: `1px solid ${wrongChain ? "rgba(251,146,60,0.20)" : "rgba(141,216,159,0.18)"}`,
+                background: wrongChain ? "var(--tint-warning)" : "var(--tint-success)",
+                border: `1px solid ${wrongChain ? "var(--tint-warning-border)" : "var(--tint-success-border)"}`,
                 color: wrongChain ? "var(--warning)" : "var(--success)",
               }}
             >
@@ -189,16 +192,30 @@ export function Layout({ view, onView, children }: LayoutProps) {
               {wrongChain ? "Wrong network" : "Arc Testnet"}
             </div>
 
+            <ThemeToggle />
+
             <ConnectKitButton
-              customTheme={{
-                "--ck-font-family": "'DM Sans', sans-serif",
-                "--ck-primary-button-background": "rgba(172,198,233,0.12)",
-                "--ck-primary-button-color": "#acc6e9",
-                "--ck-primary-button-border-radius": "12px",
-                "--ck-body-background": "#0d1b2f",
-                "--ck-body-color": "#f9faf3",
-                "--ck-modal-box-shadow": "0 24px 80px rgba(0,0,0,0.6)",
-              }}
+              customTheme={
+                theme === "dark"
+                  ? {
+                      "--ck-font-family": "'DM Sans', sans-serif",
+                      "--ck-primary-button-background": "rgba(172,198,233,0.12)",
+                      "--ck-primary-button-color": "#acc6e9",
+                      "--ck-primary-button-border-radius": "12px",
+                      "--ck-body-background": "#0d1b2f",
+                      "--ck-body-color": "#f9faf3",
+                      "--ck-modal-box-shadow": "0 24px 80px rgba(0,0,0,0.6)",
+                    }
+                  : {
+                      "--ck-font-family": "'DM Sans', sans-serif",
+                      "--ck-primary-button-background": "rgba(31,78,140,0.10)",
+                      "--ck-primary-button-color": "#1f4e8c",
+                      "--ck-primary-button-border-radius": "12px",
+                      "--ck-body-background": "#fbf9f4",
+                      "--ck-body-color": "#0d1b2f",
+                      "--ck-modal-box-shadow": "0 24px 80px rgba(13,27,47,0.25)",
+                    }
+              }
             />
           </div>
         </header>

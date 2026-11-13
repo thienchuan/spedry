@@ -40,7 +40,7 @@ export function SpendHistory() {
         <div className="rounded-3xl p-10 text-center max-w-sm"
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl"
-            style={{ background: "rgba(172,198,233,0.08)" }}>
+            style={{ background: "var(--tint-accent)" }}>
             <History className="size-6" style={{ color: "var(--accent)" }} />
           </div>
           <p className="text-sm font-medium mb-1" style={{ color: "var(--ink-2)" }}>Connect your wallet</p>
@@ -69,14 +69,14 @@ export function SpendHistory() {
 
       {error && (
         <div className="flex items-start gap-3 rounded-2xl px-4 py-3 text-sm"
-          style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.20)", color: "var(--danger)" }}>
+          style={{ background: "var(--tint-danger)", border: "1px solid var(--tint-danger-border)", color: "var(--danger)" }}>
           <AlertTriangle className="size-4 shrink-0 mt-0.5" />{error}
         </div>
       )}
 
       <div className="rounded-2xl overflow-hidden" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
         <div className="hidden sm:grid grid-cols-[1fr_120px_180px_100px_40px] gap-4 px-4 py-2.5 text-[11px] uppercase tracking-wider font-medium"
-          style={{ background: "rgba(0,0,0,0.15)", borderBottom: "1px solid var(--border)", color: "var(--subtle)" }}>
+          style={{ background: "var(--inset)", borderBottom: "1px solid var(--border)", color: "var(--subtle)" }}>
           <span>Agent / Vault</span>
           <span>Destination</span>
           <span>Time</span>
@@ -97,9 +97,9 @@ export function SpendHistory() {
         ) : (
           <div className="divide-y" style={{ borderColor: "var(--border)" }}>
             {spends.map((s) => (
-              <div key={s.id} className="flex sm:grid sm:grid-cols-[1fr_120px_180px_100px_40px] items-center gap-3 sm:gap-4 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+              <div key={s.id} className="flex sm:grid sm:grid-cols-[1fr_120px_180px_100px_40px] items-center gap-3 sm:gap-4 px-4 py-3 hover:bg-[var(--hover)] transition-colors">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="flex size-7 items-center justify-center rounded-lg shrink-0" style={{ background: "rgba(74,222,128,0.06)" }}>
+                  <div className="flex size-7 items-center justify-center rounded-lg shrink-0" style={{ background: "var(--tint-success)" }}>
                     <TokenUSDC variant="branded" size={16} />
                   </div>
                   <div className="min-w-0">
@@ -117,7 +117,7 @@ export function SpendHistory() {
                 </div>
                 <div className="hidden sm:flex justify-center">
                   <a href={buildTxExplorerUrl(CHAIN_ID, s.tx_hash)} target="_blank" rel="noreferrer"
-                    className="flex size-7 items-center justify-center rounded-lg transition-all hover:bg-white/[0.06]"
+                    className="flex size-7 items-center justify-center rounded-lg transition-all hover:bg-[var(--hover)]"
                     style={{ color: "var(--subtle)" }}>
                     <ExternalLink className="size-3.5" />
                   </a>

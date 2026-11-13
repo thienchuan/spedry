@@ -93,7 +93,7 @@ export function Footer() {
       className="mt-auto w-full"
       style={{
         borderTop: "1px solid var(--border)",
-        background: "rgba(10,18,36,0.70)",
+        background: "var(--footer-bg)",
         backdropFilter: "blur(12px)",
       }}
     >
@@ -120,8 +120,8 @@ export function Footer() {
             <div
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium"
               style={{
-                background: "rgba(74,222,128,0.08)",
-                border: "1px solid rgba(74,222,128,0.20)",
+                background: "var(--tint-success)",
+                border: "1px solid var(--tint-success-border)",
                 color: "var(--success)",
               }}
             >

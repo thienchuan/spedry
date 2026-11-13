@@ -42,7 +42,7 @@ interface MarkProps {
 function SGateMark({ size = 32, mode = "default", id = "sg" }: MarkProps) {
   const stroke =
     mode === "default" ? BRAND.bgDark :
-    mode === "dark"    ? BRAND.accent  :
+    mode === "dark"    ? "var(--accent)" :
     /* mono */           "#ffffff";
 
   const sw  = size * 0.069; // stroke-width proportional
@@ -140,7 +140,7 @@ export function SpendryLogo({
 
   const wordColor =
     mode === "mono" ? "#ffffff" :
-    BRAND.ink;
+    "var(--ink)";
 
   const subColor  = BRAND.subtle;
 

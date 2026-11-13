@@ -95,7 +95,8 @@ bun run contracts:test
 3. **Fund the vault** — deposit USDC at any time; anyone can top up a vault.
 4. **Agent spends** — the agent wallet calls `spend()` on the contract with a destination, amount, and purpose hash. All policy constraints are checked atomically onchain; the call reverts with a typed error if any limit would be breached.
 5. **Monitor** — the dashboard shows budget utilization, recent spend events, and vault health across all your vaults.
-6. **Pause** — owners can pause and resume individual vaults from the app. Changing policy limits, managing the destination whitelist, replacing the agent and withdrawing are available in the contract but have no screen in the app yet. The contract admin can globally pause the contract.
+6. **Theme** — switch between dark and light with the sun/moon button in the top bar (also on the docs pages and in Settings). Your choice is remembered in your browser; dark is the default.
+7. **Pause** — owners can pause and resume individual vaults from the app. Changing policy limits, managing the destination whitelist, replacing the agent and withdrawing are available in the contract but have no screen in the app yet. The contract admin can globally pause the contract.
 
 ---
 

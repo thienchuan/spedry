@@ -124,7 +124,7 @@ function renderLink(label: string, url: string, key: number): ReactNode {
         key={key}
         href={url}
         style={LINK_STYLE}
-        className="underline underline-offset-2 decoration-[rgba(172,198,233,0.4)] hover:decoration-current rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+        className="underline underline-offset-2 decoration-[var(--accent-line)] hover:decoration-current rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
         onClick={(e) => {
           if (isPlainClick(e)) { e.preventDefault(); navigate(url); }
         }}
@@ -140,7 +140,7 @@ function renderLink(label: string, url: string, key: number): ReactNode {
       key={key}
       href={url}
       style={LINK_STYLE}
-      className="underline underline-offset-2 decoration-[rgba(172,198,233,0.4)] hover:decoration-current rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+      className="underline underline-offset-2 decoration-[var(--accent-line)] hover:decoration-current rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
     >
@@ -237,7 +237,7 @@ function renderBlock(b: Block, key: number): ReactNode {
       );
     case "code":
       return (
-        <pre key={key} className="mono mb-5 overflow-x-auto rounded-xl p-4 text-[13px] leading-6" style={{ background: "rgba(0,0,0,0.30)", border: "1px solid var(--border)", color: "var(--ink-2)" }}>
+        <pre key={key} className="mono mb-5 overflow-x-auto rounded-xl p-4 text-[13px] leading-6" style={{ background: "var(--code-bg)", border: "1px solid var(--border)", color: "var(--ink-2)" }}>
           <code>{b.code}</code>
         </pre>
       );
@@ -245,7 +245,7 @@ function renderBlock(b: Block, key: number): ReactNode {
       return (
         <div key={key} className="mb-5 overflow-x-auto rounded-xl" style={{ border: "1px solid var(--border)" }}>
           <table className="w-full min-w-[32rem] border-collapse text-left text-sm">
-            <thead style={{ background: "rgba(0,0,0,0.15)" }}>
+            <thead style={{ background: "var(--inset)" }}>
               <tr>
                 {b.head.map((c, n) => (
                   <th key={n} scope="col" className="px-4 py-2.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--subtle)", borderBottom: "1px solid var(--border)" }}>

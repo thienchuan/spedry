@@ -186,23 +186,23 @@ export function CreateVaultSheet({ open, onClose, onCreated }: Props) {
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <motion.section
             className="relative w-full max-w-sm overflow-hidden rounded-t-3xl sm:rounded-3xl"
-            style={{ background: "rgba(10,24,44,0.97)", border: "1px solid var(--border)", backdropFilter: "blur(40px)" }}
+            style={{ background: "var(--sheet-bg)", border: "1px solid var(--border)", backdropFilter: "blur(40px)" }}
             initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Spectral strip */}
-            <div className="h-0.5" style={{ background: "linear-gradient(90deg, #acc6e9 0%, #5b87c5 50%, #acc6e9 100%)" }} />
+            <div className="h-0.5" style={{ background: "linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 50%, var(--accent) 100%)" }} />
 
             <div className="flex justify-center pt-3 pb-1">
-              <div className="h-1 w-10 rounded-full bg-white/10" />
+              <div className="h-1 w-10 rounded-full bg-[var(--border)]" />
             </div>
 
             <div className="px-5 pb-6 pt-2">
               {step === "success" ? (
                 <div className="text-center py-6">
                   <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl"
-                    style={{ background: "rgba(74,222,128,0.10)" }}>
+                    style={{ background: "var(--tint-success)" }}>
                     <CheckCircle2 className="size-7" style={{ color: "var(--success)" }} />
                   </div>
                   <div className="display text-xl font-700 mb-2" style={{ color: "var(--ink)", letterSpacing: "-0.02em" }}>
@@ -255,7 +255,7 @@ export function CreateVaultSheet({ open, onClose, onCreated }: Props) {
                             className="flex size-5 items-center justify-center rounded-full text-[10px] font-700"
                             style={{
                               background: step === s ? "var(--accent)" : "var(--surface-muted)",
-                              color: step === s ? "#0a1525" : "var(--subtle)",
+                              color: step === s ? "var(--on-accent)" : "var(--subtle)",
                             }}
                           >{i + 1}</div>
                           <span className="text-[11px] hidden sm:inline" style={{ color: step === s ? "var(--ink-2)" : "var(--subtle)" }}>
@@ -335,7 +335,7 @@ export function CreateVaultSheet({ open, onClose, onCreated }: Props) {
                   {!CONTRACT_ADDRESS && (
                     <div
                       className="mt-4 flex items-start gap-2 rounded-xl p-3 text-xs"
-                      style={{ background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.15)", color: "var(--warning)" }}
+                      style={{ background: "var(--tint-warning)", border: "1px solid var(--tint-warning-border)", color: "var(--warning)" }}
                     >
                       <AlertCircle className="size-4 shrink-0 mt-0.5" />
                       Contract not deployed yet. Deploy AgentVault to Arc Testnet first.
@@ -345,7 +345,7 @@ export function CreateVaultSheet({ open, onClose, onCreated }: Props) {
                   {needsApproval && formValid && (
                     <div
                       className="mt-4 flex items-start gap-2 rounded-xl p-3 text-xs"
-                      style={{ background: "rgba(172,198,233,0.05)", border: "1px solid rgba(172,198,233,0.12)", color: "var(--muted)" }}
+                      style={{ background: "var(--tint-accent)", border: "1px solid var(--border)", color: "var(--muted)" }}
                     >
                       <Info className="size-4 shrink-0 mt-0.5" />
                       You'll first approve the vault contract to spend {budgetStr} USDC from your wallet (2 transactions total).
@@ -356,7 +356,7 @@ export function CreateVaultSheet({ open, onClose, onCreated }: Props) {
                     onClick={handlePrimary}
                     disabled={!formValid || isPending}
                     className="mt-5 w-full rounded-2xl py-3.5 text-sm font-semibold transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{ background: "var(--accent)", color: "#0a1525" }}
+                    style={{ background: "var(--accent)", color: "var(--on-accent)" }}
                   >
                     {primaryLabel()}
                   </button>

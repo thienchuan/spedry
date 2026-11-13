@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Globe, Menu, X } from "lucide-react";
 import { SpendryLogo } from "./SpendryLogo";
+import { ThemeToggle } from "./ThemeToggle";
 import { Markdown } from "@/lib/markdown";
 import {
   DEFAULT_LANG,
@@ -72,7 +73,7 @@ function LanguageSwitch({ lang, slug }: { lang: Lang; slug: string | undefined }
               className="rounded-[10px] px-3 py-1 text-xs font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
               style={{
                 background: active ? "var(--accent)" : "transparent",
-                color: active ? "#0a1525" : "var(--muted)",
+                color: active ? "var(--on-accent)" : "var(--muted)",
               }}
             >
               {l.toUpperCase()}
@@ -146,7 +147,7 @@ export function DocsPage({ path }: { path: string }) {
         {(prev || next) && (
           <nav aria-label={t.pages} className="mt-12 grid gap-3 sm:grid-cols-2">
             {prev ? (
-              <NavLink to={docPath(lang, prev.slug)} className="group rounded-2xl p-4 transition-colors hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+              <NavLink to={docPath(lang, prev.slug)} className="group rounded-2xl p-4 transition-colors hover:bg-[var(--hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
                 <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider" style={{ color: "var(--subtle)" }}>
                   <ArrowLeft className="size-3" aria-hidden="true" />{t.previous}
                 </span>
@@ -154,7 +155,7 @@ export function DocsPage({ path }: { path: string }) {
               </NavLink>
             ) : <span />}
             {next ? (
-              <NavLink to={docPath(lang, next.slug)} className="group rounded-2xl p-4 text-right transition-colors hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+              <NavLink to={docPath(lang, next.slug)} className="group rounded-2xl p-4 text-right transition-colors hover:bg-[var(--hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]" style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
                 <span className="flex items-center justify-end gap-1.5 text-[11px] uppercase tracking-wider" style={{ color: "var(--subtle)" }}>
                   {t.next}<ArrowRight className="size-3" aria-hidden="true" />
                 </span>
@@ -185,10 +186,10 @@ export function DocsPage({ path }: { path: string }) {
             to={docPath(d.lang, d.slug)}
             current={active}
             onNavigate={() => setMenuOpen(false)}
-            className="rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+            className="rounded-xl px-3 py-2 text-sm font-medium transition-colors hover:bg-[var(--hover)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
             style={{
               color: active ? "var(--accent)" : "var(--muted)",
-              background: active ? "rgba(172,198,233,0.08)" : "transparent",
+              background: active ? "var(--tint-accent)" : "transparent",
             }}
           >
             {d.title}
@@ -203,19 +204,19 @@ export function DocsPage({ path }: { path: string }) {
       <a
         href="#doc-content"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:px-3 focus:py-2 focus:text-sm"
-        style={{ background: "var(--accent)", color: "#0a1525" }}
+        style={{ background: "var(--accent)", color: "var(--on-accent)" }}
       >
         {t.skip}
       </a>
 
       <header
         className="sticky top-0 z-30 border-b"
-        style={{ background: "rgba(13,27,47,0.88)", backdropFilter: "blur(20px)", borderColor: "var(--border)" }}
+        style={{ background: "var(--topbar-bg)", backdropFilter: "blur(20px)", borderColor: "var(--border)" }}
       >
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-3 sm:px-6">
           <button
             type="button"
-            className="rounded-lg p-1.5 transition-colors hover:bg-white/[0.06] lg:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+            className="rounded-lg p-1.5 transition-colors hover:bg-[var(--hover)] lg:hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
             style={{ color: "var(--muted)" }}
             aria-label={t.menu}
             aria-expanded={menuOpen}
@@ -234,10 +235,11 @@ export function DocsPage({ path }: { path: string }) {
 
           <div className="ml-auto flex items-center gap-3">
             <LanguageSwitch lang={uiLang} slug={slug} />
+            <ThemeToggle />
             <NavLink
               to="/"
               className="rounded-xl px-3.5 py-1.5 text-xs font-semibold transition-transform hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
-              style={{ background: "var(--accent)", color: "#0a1525" }}
+              style={{ background: "var(--accent)", color: "var(--on-accent)" }}
             >
               {t.openApp}
             </NavLink>

@@ -94,7 +94,7 @@ export function Dashboard({ onNavigate }: Props) {
 
       {error && (
         <div className="flex items-start gap-3 rounded-2xl px-4 py-3 text-sm"
-          style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.20)", color: "var(--danger)" }}>
+          style={{ background: "var(--tint-danger)", border: "1px solid var(--tint-danger-border)", color: "var(--danger)" }}>
           <AlertTriangle className="size-4 shrink-0 mt-0.5" />{error}
         </div>
       )}
@@ -126,9 +126,9 @@ export function Dashboard({ onNavigate }: Props) {
             <span className="text-sm font-medium" style={{ color: "var(--ink-2)" }}>Portfolio Utilization</span>
             <span className="display text-sm font-700 tabular-nums" style={{ color: "var(--accent)" }}>{status.utilizationPct}%</span>
           </div>
-          <div className="h-2 rounded-full" style={{ background: "rgba(172,198,233,0.12)" }}>
+          <div className="h-2 rounded-full" style={{ background: "var(--tint-accent-strong)" }}>
             <div className="h-2 rounded-full transition-all duration-700"
-              style={{ width: `${Math.min(100, Number(status.utilizationPct))}%`, background: "linear-gradient(90deg, var(--accent) 0%, #5b87c5 100%)" }} />
+              style={{ width: `${Math.min(100, Number(status.utilizationPct))}%`, background: "linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%)" }} />
           </div>
           <div className="flex justify-between mt-2 text-[11px]" style={{ color: "var(--subtle)" }}>
             <span>${status.totalSpentUsdc} spent</span>
@@ -161,13 +161,13 @@ export function Dashboard({ onNavigate }: Props) {
           <div className="divide-y" style={{ borderColor: "var(--border)" }}>
             {recentSpends.map((s) => (
               <div key={s.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex size-8 items-center justify-center rounded-lg shrink-0" style={{ background: "rgba(74,222,128,0.08)" }}>
+                <div className="flex size-8 items-center justify-center rounded-lg shrink-0" style={{ background: "var(--tint-success)" }}>
                   <TokenUSDC variant="branded" size={18} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-medium" style={{ color: "var(--ink-2)" }}>{s.vault_name ?? `Vault #${s.vault_id}`}</span>
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ background: "rgba(172,198,233,0.08)", color: "var(--subtle)" }}>Agent spend</span>
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md" style={{ background: "var(--tint-accent)", color: "var(--subtle)" }}>Agent spend</span>
                   </div>
                   <div className="text-[11px] mt-0.5 mono truncate" style={{ color: "var(--subtle)" }}>→ {formatAddress(s.destination)}</div>
                 </div>

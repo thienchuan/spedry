@@ -2,11 +2,12 @@ import React from "react";
 import { useAccount } from "wagmi";
 import {
   ExternalLink, Copy, CheckCircle2, Shield, Zap,
-  Code2, FileText, AlertCircle
+  Code2, FileText, AlertCircle, Palette
 } from "lucide-react";
 import { getUsdc, requireChain } from "@/onchain-facts";
 import { formatAddress } from "@/lib/utils";
 import { toast } from "sonner";
+import { ThemeSwitch } from "./ThemeToggle";
 
 const CHAIN_ID = 5042002;
 const CONTRACT_ADDRESS = (import.meta.env.VITE_CONTRACT_ADDRESS ?? "") as string;
@@ -31,6 +32,14 @@ export function SettingsPage() {
           Contract configuration and developer references
         </p>
       </div>
+
+      {/* Appearance */}
+      <Card title="Appearance" icon={Palette}>
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-xs" style={{ color: "var(--subtle)" }}>Theme</span>
+          <ThemeSwitch />
+        </div>
+      </Card>
 
       {/* Network info */}
       <Card title="Network" icon={Zap}>
@@ -111,7 +120,7 @@ export function SettingsPage() {
         </p>
         <div
           className="rounded-xl p-3 mono text-xs overflow-x-auto"
-          style={{ background: "rgba(0,0,0,0.30)", color: "var(--ink-2)", border: "1px solid var(--border)" }}
+          style={{ background: "var(--code-bg)", color: "var(--ink-2)", border: "1px solid var(--border)" }}
         >
           <div style={{ color: "var(--subtle)" }}>{"// Minimal agent integration (viem)"}</div>
           <div>{`const purposeHash = keccak256(toHex("Search: quarterly report"))`}</div>

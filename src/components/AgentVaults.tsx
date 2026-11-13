@@ -75,7 +75,7 @@ export function AgentVaults() {
         <div className="rounded-3xl p-10 text-center max-w-sm"
           style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-2xl"
-            style={{ background: "rgba(172,198,233,0.08)" }}>
+            style={{ background: "var(--tint-accent)" }}>
             <Bot className="size-6" style={{ color: "var(--accent)" }} />
           </div>
           <p className="text-sm font-medium mb-1" style={{ color: "var(--ink-2)" }}>Connect your wallet</p>
@@ -102,7 +102,7 @@ export function AgentVaults() {
           </button>
           <button onClick={() => setShowCreate(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-            style={{ background: "var(--accent)", color: "#0a1525" }}>
+            style={{ background: "var(--accent)", color: "var(--on-accent)" }}>
             <Plus className="size-4" />New Vault
           </button>
         </div>
@@ -110,7 +110,7 @@ export function AgentVaults() {
 
       {error && (
         <div className="flex items-start gap-3 rounded-2xl px-4 py-3 text-sm"
-          style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.20)", color: "var(--danger)" }}>
+          style={{ background: "var(--tint-danger)", border: "1px solid var(--tint-danger-border)", color: "var(--danger)" }}>
           <AlertTriangle className="size-4 shrink-0 mt-0.5" />{error}
         </div>
       )}
@@ -127,7 +127,7 @@ export function AgentVaults() {
           <p className="text-xs mb-5" style={{ color: "var(--subtle)" }}>Create a vault to start managing your agent's USDC budget onchain</p>
           <button onClick={() => setShowCreate(true)}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold"
-            style={{ background: "var(--accent)", color: "#0a1525" }}>
+            style={{ background: "var(--accent)", color: "var(--on-accent)" }}>
             <Plus className="size-4" />Create First Vault
           </button>
         </div>
@@ -146,7 +146,7 @@ export function AgentVaults() {
                 <div className="px-4 py-4">
                   <div className="flex items-start gap-3">
                     <div className="flex size-10 items-center justify-center rounded-xl shrink-0"
-                      style={{ background: isActive ? "rgba(172,198,233,0.10)" : "rgba(248,113,113,0.06)" }}>
+                      style={{ background: isActive ? "var(--tint-accent-strong)" : "var(--tint-danger)" }}>
                       <Bot className="size-5" style={{ color: isActive ? "var(--accent)" : "var(--danger)" }} />
                     </div>
                     <div className="flex-1 min-w-0">
@@ -168,9 +168,9 @@ export function AgentVaults() {
                       <span>Spent: {vault.spent_total_fmt}</span>
                       <span>{vault.utilization_pct}% of {vault.total_budget_fmt}</span>
                     </div>
-                    <div className="h-1.5 rounded-full" style={{ background: "rgba(172,198,233,0.10)" }}>
+                    <div className="h-1.5 rounded-full" style={{ background: "var(--tint-accent-strong)" }}>
                       <div className="h-1.5 rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, background: pct > 90 ? "var(--danger)" : pct > 70 ? "var(--warning)" : "linear-gradient(90deg, var(--accent), #5b87c5)" }} />
+                        style={{ width: `${pct}%`, background: pct > 90 ? "var(--danger)" : pct > 70 ? "var(--warning)" : "linear-gradient(90deg, var(--accent), var(--accent-2))" }} />
                     </div>
                   </div>
 
@@ -186,32 +186,32 @@ export function AgentVaults() {
                   <div className="flex items-center gap-2 mt-4 flex-wrap">
                     <button onClick={() => setDepositVaultId(vault.id)}
                       className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-                      style={{ background: "var(--accent)", color: "#0a1525" }}>
+                      style={{ background: "var(--accent)", color: "var(--on-accent)" }}>
                       <DollarSign className="size-3.5" />Fund
                     </button>
                     {isActive ? (
                       <button onClick={() => handlePause(vault.id)} disabled={isPending || txConfirming}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 disabled:opacity-40"
-                        style={{ background: "rgba(232,109,122,0.08)", color: "var(--danger)", border: "1px solid rgba(232,109,122,0.15)" }}>
+                        style={{ background: "var(--tint-danger)", color: "var(--danger)", border: "1px solid var(--tint-danger-border)" }}>
                         {(isPending || txConfirming) ? <Loader2 className="size-3.5 animate-spin" /> : <Pause className="size-3.5" />}Pause
                       </button>
                     ) : (
                       <button onClick={() => handleResume(vault.id)} disabled={isPending || txConfirming}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 disabled:opacity-40"
-                        style={{ background: "rgba(141,216,159,0.08)", color: "var(--success)", border: "1px solid rgba(141,216,159,0.15)" }}>
+                        style={{ background: "var(--tint-success)", color: "var(--success)", border: "1px solid var(--tint-success-border)" }}>
                         {(isPending || txConfirming) ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}Resume
                       </button>
                     )}
                     <div className="flex items-center gap-1.5 ml-auto">
                       <a href={buildAddressExplorerUrl(CHAIN_ID, CONTRACT_ADDRESS)} target="_blank" rel="noreferrer"
                         aria-label="View contract on explorer"
-                        className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.06]"
+                        className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--hover)]"
                         style={{ color: "var(--subtle)", border: "1px solid var(--border)" }}>
                         <ExternalLink className="size-3.5" />
                       </a>
                       <button onClick={() => toggleExpand(vault.id)}
                         aria-label={isExpanded ? "Collapse spends" : "Expand spends"}
-                        className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.06]"
+                        className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-[var(--hover)]"
                         style={{ color: "var(--subtle)", border: "1px solid var(--border)" }}>
                         {isExpanded ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />}
                       </button>
@@ -220,7 +220,7 @@ export function AgentVaults() {
                 </div>
 
                 {isExpanded && (
-                  <div className="border-t px-4 py-3" style={{ borderColor: "var(--border)", background: "rgba(0,0,0,0.15)" }}>
+                  <div className="border-t px-4 py-3" style={{ borderColor: "var(--border)", background: "var(--inset)" }}>
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xs font-600" style={{ color: "var(--ink-2)" }}>Recent Spend Events</span>
                       <span className="text-[11px]" style={{ color: "var(--subtle)" }}>Last 10 · onchain</span>
@@ -272,9 +272,9 @@ export function AgentVaults() {
 
 function StatusBadge({ active, expiry, nowTs }: { active: number; expiry: number; nowTs: number }) {
   const isExpired = expiry > 0 && expiry < nowTs;
-  if (!active) return <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: "rgba(248,113,113,0.10)", color: "var(--danger)" }}>Paused</span>;
-  if (isExpired) return <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: "rgba(251,146,60,0.10)", color: "var(--warning)" }}>Expired</span>;
-  return <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: "rgba(74,222,128,0.08)", color: "var(--success)" }}>Active</span>;
+  if (!active) return <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: "var(--tint-danger)", color: "var(--danger)" }}>Paused</span>;
+  if (isExpired) return <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: "var(--tint-warning)", color: "var(--warning)" }}>Expired</span>;
+  return <span className="text-[10px] px-1.5 py-0.5 rounded-md font-medium" style={{ background: "var(--tint-success)", color: "var(--success)" }}>Active</span>;
 }
 
 function Pill({ icon: Icon, label, title }: { icon: React.ElementType; label: string; title?: string }) {
