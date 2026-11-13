@@ -69,12 +69,16 @@ export function CreateVaultSheet({ open, onClose, onCreated }: Props) {
     }
   }, [approveSuccess, refetchAllowance]);
 
+  // This sheet stays mounted, so createSuccess stays true after the first vault.
+  // `onCreated` is a new inline function on every parent render; without this
+  // per-hash guard the effect would re-fire (and refetch) on every render.
+  const notifiedCreate = React.useRef<string | undefined>(undefined);
   React.useEffect(() => {
-    if (createSuccess) {
-      setStep("success");
-      onCreated();
-    }
-  }, [createSuccess, onCreated]);
+    if (!createSuccess || !createHash || notifiedCreate.current === createHash) return;
+    notifiedCreate.current = createHash;
+    setStep("success");
+    onCreated();
+  }, [createSuccess, createHash, onCreated]);
 
   const parsedBudget = budgetStr ? parseAmount(CHAIN_ID, budgetStr) : null;
   const parsedDaily = dailyStr ? parseAmount(CHAIN_ID, dailyStr) : null;

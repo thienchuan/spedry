@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useAccount } from "wagmi";
 import { History, ExternalLink, RefreshCw, AlertTriangle, Bot } from "lucide-react";
-import { apiClient, type SpendEvent } from "@/lib/api";
+import { useOwnerSpends, useOwnerVaults } from "@/hooks/useChainData";
 import { buildTxExplorerUrl } from "@/onchain-facts";
 import { formatAddress, formatTs } from "@/lib/utils";
 import { TokenUSDC } from "@web3icons/react";
@@ -11,40 +11,28 @@ const PAGE_SIZE = 25;
 
 export function SpendHistory() {
   const { address, isConnected } = useAccount();
-  const [spends, setSpends] = useState<SpendEvent[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [offset, setOffset] = useState(0);
-  const [hasMore, setHasMore] = useState(false);
+  const vaultsQ = useOwnerVaults(address);
+  const spendsQ = useOwnerSpends(vaultsQ.data);
+  const [visible, setVisible] = useState(PAGE_SIZE);
 
-  const load = useCallback(async (off = 0) => {
-    if (!address) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await apiClient.getAllSpends(address, PAGE_SIZE, off);
-      if (off === 0) setSpends(res.spends);
-      else setSpends((prev) => [...prev, ...res.spends]);
-      setHasMore(res.spends.length === PAGE_SIZE);
-    } catch {
-      setError("Could not load spend history.");
-    } finally {
-      setLoading(false);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+  const all = spendsQ.data ?? [];
+  const spends = all.slice(0, visible);
+  const hasMore = all.length > visible;
+  const loading = vaultsQ.isLoading || spendsQ.isLoading;
+  const refreshing = vaultsQ.isFetching || spendsQ.isFetching;
+  const error = vaultsQ.error
+    ? "Could not read your vaults from Arc Testnet. Try Refresh."
+    : spendsQ.error
+    ? "Could not load spend history from the explorer. Try Refresh."
+    : null;
 
-  useEffect(() => {
-    setOffset(0);
-    void load(0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
-
-  const loadMore = () => {
-    const next = offset + PAGE_SIZE;
-    setOffset(next);
-    void load(next);
+  const { refetch: refetchVaults } = vaultsQ;
+  const { refetch: refetchSpends } = spendsQ;
+  const load = async () => {
+    await Promise.all([refetchVaults(), refetchSpends()]);
   };
+
+  const loadMore = () => setVisible((n) => n + PAGE_SIZE);
 
   if (!isConnected) {
     return (
@@ -68,13 +56,13 @@ export function SpendHistory() {
         <div>
           <h2 className="display text-xl font-700" style={{ color: "var(--ink)", letterSpacing: "-0.02em" }}>Spend History</h2>
           <p className="text-xs mt-0.5" style={{ color: "var(--subtle)" }}>
-            {spends.length} event{spends.length !== 1 ? "s" : ""} · indexed from Arc Testnet
+            {all.length} event{all.length !== 1 ? "s" : ""} · from Arc Testnet logs
           </p>
         </div>
-        <button onClick={() => void load(0)} disabled={loading}
+        <button onClick={() => void load()} disabled={refreshing}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 disabled:opacity-40"
           style={{ background: "var(--surface-strong)", color: "var(--muted)", border: "1px solid var(--border)" }}>
-          <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>

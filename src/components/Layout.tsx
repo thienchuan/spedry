@@ -3,9 +3,10 @@ import { ConnectKitButton } from "connectkit";
 import { useAccount } from "wagmi";
 import {
   LayoutDashboard, Bot, History, Settings, ChevronRight,
-  Shield, Menu, X, AlertTriangle,
+  Shield, Menu, X, AlertTriangle, BookOpen,
 } from "lucide-react";
 import { cn, formatAddress } from "@/lib/utils";
+import { isPlainClick, navigate } from "@/lib/nav";
 import { Footer } from "./Footer";
 import { SpendryLogo } from "./SpendryLogo";
 
@@ -81,6 +82,19 @@ export function Layout({ view, onView, children }: LayoutProps) {
               )}
             </button>
           ))}
+          <a
+            href="/docs"
+            onClick={(e) => {
+              if (!isPlainClick(e)) return;
+              e.preventDefault();
+              navigate("/docs");
+            }}
+            className="mt-3 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all hover:bg-white/[0.06] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--focus)]"
+            style={{ color: "var(--muted)" }}
+          >
+            <BookOpen className="size-4 shrink-0" />
+            Documentation
+          </a>
         </nav>
 
         {/* Status strip */}

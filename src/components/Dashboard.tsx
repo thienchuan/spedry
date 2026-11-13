@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useMemo } from "react";
 import { useAccount } from "wagmi";
 import {
   TrendingUp, Bot, DollarSign, Activity, AlertTriangle,
   ArrowUpRight, RefreshCw
 } from "lucide-react";
 import { SpendryLogo } from "./SpendryLogo";
-import { apiClient, type StatusData, type SpendEvent } from "@/lib/api";
+import { computeStatus } from "@/lib/chain";
+import { useOwnerSpends, useOwnerVaults } from "@/hooks/useChainData";
 import { formatUSDC, formatAddress, formatTs } from "@/lib/utils";
 import { TokenUSDC } from "@web3icons/react";
 
@@ -16,38 +17,26 @@ interface Props {
 export function Dashboard({ onNavigate }: Props) {
   const { address, isConnected } = useAccount();
 
-  const [status, setStatus] = useState<StatusData | null>(null);
-  const [recentSpends, setRecentSpends] = useState<SpendEvent[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // Vault state is read from the contract; spend events from the explorer log API.
+  const vaultsQ = useOwnerVaults(address);
+  const spendsQ = useOwnerSpends(vaultsQ.data);
 
-  // `load` captures `address` via closure — recreated only when address changes.
-  // useEffect([address]) fires only when the string value actually changes.
-  // wagmi guarantees address is a stable string primitive between renders.
-  const load = useCallback(async () => {
-    if (!address) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const [statusRes, spendsRes] = await Promise.all([
-        apiClient.getStatus(address),
-        apiClient.getAllSpends(address, 5, 0),
-      ]);
-      setStatus(statusRes);
-      setRecentSpends(spendsRes.spends);
-    } catch {
-      setError("Could not load dashboard data. Ensure the API server is running.");
-    } finally {
-      setLoading(false);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+  const status = useMemo(() => (vaultsQ.data ? computeStatus(vaultsQ.data) : null), [vaultsQ.data]);
+  const recentSpends = spendsQ.data?.slice(0, 5) ?? [];
+  const loading = vaultsQ.isLoading || spendsQ.isLoading;
+  const refreshing = vaultsQ.isFetching || spendsQ.isFetching;
+  const error = vaultsQ.error
+    ? "Could not read your vaults from Arc Testnet. Try Refresh."
+    : spendsQ.error
+    ? "Could not load spend events from the explorer. Try Refresh."
+    : null;
 
-  // Runs only when `address` string value changes. NOT on every render.
-  useEffect(() => {
-    void load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+  const { refetch: refetchVaults } = vaultsQ;
+  const { refetch: refetchSpends } = spendsQ;
+  const load = () => {
+    void refetchVaults();
+    void refetchSpends();
+  };
 
   if (!isConnected) {
     return (
@@ -93,12 +82,12 @@ export function Dashboard({ onNavigate }: Props) {
           <p className="text-xs mt-0.5 mono" style={{ color: "var(--subtle)" }}>{formatAddress(address)}</p>
         </div>
         <button
-          onClick={() => void load()}
-          disabled={loading}
+          onClick={load}
+          disabled={refreshing}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 disabled:opacity-40"
           style={{ background: "var(--surface-strong)", color: "var(--muted)", border: "1px solid var(--border)" }}
         >
-          <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
           Refresh
         </button>
       </div>

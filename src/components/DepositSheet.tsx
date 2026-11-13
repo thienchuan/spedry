@@ -59,9 +59,14 @@ export function DepositSheet({ vaultId, open, onClose, onDeposited }: Props) {
     if (approveSuccess) { void refetchAllowance(); }
   }, [approveSuccess, refetchAllowance]);
 
+  // `onDeposited` is a new inline function on every parent render; notify once per deposit tx.
+  const notifiedDeposit = React.useRef<string | undefined>(undefined);
   React.useEffect(() => {
-    if (depositSuccess) { setDone(true); onDeposited(); }
-  }, [depositSuccess, onDeposited]);
+    if (!depositSuccess || !depositHash || notifiedDeposit.current === depositHash) return;
+    notifiedDeposit.current = depositHash;
+    setDone(true);
+    onDeposited();
+  }, [depositSuccess, depositHash, onDeposited]);
 
   const handleApprove = () => {
     if (!usdcFact) return;

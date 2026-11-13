@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi";
 import {
   Plus, Bot, RefreshCw, AlertTriangle, Play, Pause,
@@ -8,9 +8,9 @@ import {
 import { type Address } from "viem";
 import { CreateVaultSheet } from "./CreateVaultSheet";
 import { DepositSheet } from "./DepositSheet";
-import { apiClient, type VaultSummary, type SpendEvent } from "@/lib/api";
+import { useOwnerSpends, useOwnerVaults } from "@/hooks/useChainData";
 import { AGENT_VAULT_ABI } from "@/lib/abi";
-import { buildTxExplorerUrl } from "@/onchain-facts";
+import { buildAddressExplorerUrl, buildTxExplorerUrl } from "@/onchain-facts";
 import { formatAddress, formatUSDCCompact, pctBar, formatExpiry, formatTs } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -21,71 +21,42 @@ export function AgentVaults() {
   const { address, isConnected, chainId } = useAccount();
   const { switchChain } = useSwitchChain();
 
-  const [vaults, setVaults] = useState<VaultSummary[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [depositVaultId, setDepositVaultId] = useState<number | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
-  const [vaultSpends, setVaultSpends] = useState<Record<number, SpendEvent[]>>({});
 
   const wrongChain = chainId !== CHAIN_ID;
 
-  // `load` captures address via closure; recreated only when address changes.
-  const load = useCallback(async () => {
-    if (!address) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await apiClient.getVaults(address);
-      setVaults(res.vaults);
-    } catch {
-      setError("Could not load vaults. Ensure the API server is running.");
-    } finally {
-      setLoading(false);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+  // Vaults are read from the contract; spends from the explorer log API.
+  // Both queries are keyed by address / vault ids, so nothing refetches on re-render.
+  const vaultsQ = useOwnerVaults(address);
+  const spendsQ = useOwnerSpends(vaultsQ.data);
+  const vaults = vaultsQ.data ?? [];
+  const loading = vaultsQ.isLoading;
+  const refreshing = vaultsQ.isFetching || spendsQ.isFetching;
+  const error = vaultsQ.error ? "Could not read your vaults from Arc Testnet. Try again." : null;
 
-  // Fires only when address string value changes — not on every render.
-  useEffect(() => {
-    void load();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [address]);
+  const { refetch: refetchVaults } = vaultsQ;
+  const { refetch: refetchSpends } = spendsQ;
+  const load = async () => {
+    await Promise.all([refetchVaults(), refetchSpends()]);
+  };
 
-  // loadSpends uses functional setState so it never needs vaultSpends in its deps.
-  const loadSpends = useCallback((vaultId: number) => {
-    setVaultSpends((prev) => {
-      if (prev[vaultId] !== undefined) return prev;
-      void apiClient.getVaultSpends(vaultId, 10, 0).then((res) => {
-        setVaultSpends((p) => (p[vaultId]?.length ? p : { ...p, [vaultId]: res.spends }));
-      });
-      return { ...prev, [vaultId]: [] };
-    });
-  }, []);
-
-  const toggleExpand = useCallback((id: number) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-    loadSpends(id);
-  }, [loadSpends]);
+  const toggleExpand = (id: number) => setExpandedId((prev) => (prev === id ? null : id));
 
   // Pause/resume
   const { writeContract, data: txHash, isPending } = useWriteContract();
   const { isLoading: txConfirming, isSuccess: txSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
-  // Use a ref to track previous txSuccess so we only reload once per confirmation.
-  // Dep array [txSuccess] ensures this runs only when txSuccess changes — not on every render.
-  const prevTxSuccess = useRef(false);
+  // Refresh once per confirmed transaction hash. Keying on the hash (not just
+  // txSuccess) means a re-render can never trigger a second refresh.
+  const notifiedTx = useRef<string | undefined>(undefined);
   useEffect(() => {
-    if (txSuccess && !prevTxSuccess.current) {
-      prevTxSuccess.current = true;
-      toast.success("Transaction confirmed");
-      void load();
-    }
-    if (!txSuccess) {
-      prevTxSuccess.current = false;
-    }
-  }, [txSuccess, load]);
+    if (!txSuccess || !txHash || notifiedTx.current === txHash) return;
+    notifiedTx.current = txHash;
+    toast.success("Transaction confirmed");
+    void refetchVaults();
+  }, [txSuccess, txHash, refetchVaults]);
 
   const handlePause = (vaultId: number) => {
     if (wrongChain) { switchChain({ chainId: CHAIN_ID }); return; }
@@ -124,10 +95,10 @@ export function AgentVaults() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => void load()} disabled={loading}
+          <button onClick={() => void load()} disabled={refreshing} aria-label="Refresh vaults"
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:opacity-80 disabled:opacity-40"
             style={{ background: "var(--surface-strong)", color: "var(--muted)", border: "1px solid var(--border)" }}>
-            <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`size-3.5 ${refreshing ? "animate-spin" : ""}`} />
           </button>
           <button onClick={() => setShowCreate(true)}
             className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -165,7 +136,9 @@ export function AgentVaults() {
           {vaults.map((vault) => {
             const pct = pctBar(vault.spent_total, vault.total_budget);
             const isExpanded = expandedId === vault.id;
-            const spends = vaultSpends[vault.id];
+            const spends = spendsQ.data
+              ? spendsQ.data.filter((s) => s.vault_id === vault.id).slice(0, 10)
+              : undefined;
             const isActive = vault.active === 1;
             return (
               <div key={vault.id} className="rounded-2xl overflow-hidden"
@@ -230,14 +203,12 @@ export function AgentVaults() {
                       </button>
                     )}
                     <div className="flex items-center gap-1.5 ml-auto">
-                      {vault.tx_hash && (
-                        <a href={buildTxExplorerUrl(CHAIN_ID, vault.tx_hash)} target="_blank" rel="noreferrer"
-                          aria-label="View on explorer"
-                          className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.06]"
-                          style={{ color: "var(--subtle)", border: "1px solid var(--border)" }}>
-                          <ExternalLink className="size-3.5" />
-                        </a>
-                      )}
+                      <a href={buildAddressExplorerUrl(CHAIN_ID, CONTRACT_ADDRESS)} target="_blank" rel="noreferrer"
+                        aria-label="View contract on explorer"
+                        className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.06]"
+                        style={{ color: "var(--subtle)", border: "1px solid var(--border)" }}>
+                        <ExternalLink className="size-3.5" />
+                      </a>
                       <button onClick={() => toggleExpand(vault.id)}
                         aria-label={isExpanded ? "Collapse spends" : "Expand spends"}
                         className="flex size-7 items-center justify-center rounded-lg transition-colors hover:bg-white/[0.06]"
@@ -254,7 +225,11 @@ export function AgentVaults() {
                       <span className="text-xs font-600" style={{ color: "var(--ink-2)" }}>Recent Spend Events</span>
                       <span className="text-[11px]" style={{ color: "var(--subtle)" }}>Last 10 · onchain</span>
                     </div>
-                    {!spends ? (
+                    {spendsQ.isError ? (
+                      <p className="text-xs py-3" style={{ color: "var(--danger)" }}>
+                        Could not load spend events from the explorer. Try Refresh.
+                      </p>
+                    ) : !spends ? (
                       <div className="space-y-2">
                         {[0,1].map((i) => <div key={i} className="h-9 rounded-xl animate-pulse" style={{ background: "var(--surface)" }} />)}
                       </div>

@@ -1,6 +1,7 @@
 import { ExternalLink, Github, BookOpen, FileText, Shield } from "lucide-react";
 import { SpendryLogo } from "./SpendryLogo";
 import { TokenUSDC } from "@web3icons/react";
+import { isPlainClick, navigate } from "@/lib/nav";
 
 // ─── Link data ────────────────────────────────────────────────────────────────
 
@@ -39,13 +40,15 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 interface FooterLinkProps {
   href: string;
   external?: boolean;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   children: React.ReactNode;
 }
 
-function FooterLink({ href, external, children }: FooterLinkProps) {
+function FooterLink({ href, external, onClick, children }: FooterLinkProps) {
   return (
     <a
       href={href}
+      onClick={onClick}
       target={external ? "_blank" : undefined}
       rel={external ? "noopener noreferrer" : undefined}
       className="group flex items-center gap-1.5 text-sm transition-colors duration-150 focus-visible:outline-none focus-visible:ring-1 rounded"
@@ -146,6 +149,17 @@ export function Footer() {
           <div>
             <SectionLabel>Resources</SectionLabel>
             <nav aria-label="Resources navigation" className="flex flex-col gap-2.5">
+              <FooterLink
+                href="/docs"
+                onClick={(e) => {
+                  if (!isPlainClick(e)) return;
+                  e.preventDefault();
+                  navigate("/docs");
+                }}
+              >
+                <BookOpen className="size-3.5 shrink-0" aria-hidden="true" />
+                Documentation
+              </FooterLink>
               {RESOURCE_LINKS.map(({ label, href, external }) => (
                 <FooterLink key={href} href={href} external={external}>
                   {label === "GitHub" ? (

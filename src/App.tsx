@@ -4,9 +4,17 @@ import { Dashboard } from "./components/Dashboard";
 import { AgentVaults } from "./components/AgentVaults";
 import { SpendHistory } from "./components/SpendHistory";
 import { SettingsPage } from "./components/SettingsPage";
+import { DocsPage } from "./components/DocsPage";
+import { usePath } from "@/hooks/usePath";
 
 export default function App() {
   const [view, setView] = useState<View>("dashboard");
+  const path = usePath();
+
+  // Public documentation lives outside the wallet app at /docs/*.
+  if (path === "/docs" || path.startsWith("/docs/")) {
+    return <DocsPage path={path} />;
+  }
 
   const renderView = () => {
     switch (view) {

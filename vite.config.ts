@@ -37,6 +37,10 @@ export default defineConfig({
   server: {
     allowedHosts: true,
     cors: true,
+    fs: {
+      // Replaces Vite's defaults, so they are repeated. Internal docs must not be served by URL.
+      deny: ['.env', '.env.*', '*.{crt,pem}', '**/.git/**', '**/docs/internal/**', '**/docs/README.md'],
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',

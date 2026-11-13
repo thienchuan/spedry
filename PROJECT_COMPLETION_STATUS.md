@@ -1,71 +1,34 @@
-# Spendry — Project Completion Status
-_Last updated: 2026-10-30_
+# Spendry: Project Completion Status
+_Last updated: 2026-11-11_
 
 ## Architecture
-- **Smart contract**: `AgentVault.sol` deployed on Arc Testnet at `0xe14d934b49b5222833c315b3ff2c9bec70818b3d`
-- **Backend**: Bun HTTP API server (`server/api.ts`) on port 3001 + SQLite indexer (`server/indexer.ts`)
-- **Frontend**: Vite + React + TypeScript on port 5173, proxies `/api` to backend
-- **DB**: SQLite at `spendry.db` (bun:sqlite)
+- Smart contract: `AgentVault.sol` on Arc Testnet at `0xe14d934b49b5222833c315b3ff2c9bec70818b3d` (deployed at block 68648646, set as `VITE_DEPLOY_BLOCK`).
+- Frontend: Vite + React + TypeScript. Reads Arc Testnet directly. No backend is required.
+  - `src/lib/chain.ts`: vault reads (`getOwnerVaults`, `getVault`) and spend logs from the explorer log API.
+  - `src/hooks/useChainData.ts`: TanStack Query hooks (`useOwnerVaults`, `useOwnerSpends`).
+- `server/` (Bun API + SQLite indexer) is kept but is no longer called by the frontend.
 
-## Completed Work
+## Done
+- Removed the backend dependency from the UI (Dashboard, Agent Vaults, Spend History). The static build in `dist/` is deployable to Netlify.
+- Fixed the infinite `/api/vaults` request loop. Real root cause: `CreateVaultSheet` stays mounted, its `createSuccess` stays true after a vault is created, and its effect depended on the inline `onCreated` callback, so it re-fired and refetched on every parent render. Earlier fixes only changed the parent components and did not remove it. Both sheets now notify once per transaction hash.
+- Spend history now shows real block timestamps (the old indexer stored the time it processed the event).
+- `formatAddress` tolerates undefined.
 
-### Infinite loop bug — RESOLVED
-Root cause identified and fixed across 3 sessions:
+## Verified
+- Live read for owner `0xF89f...DF11`: 6 vaults, total budget 24.00 USDC, 0.00 spent, 0.00 balance. Matches chain state.
+- Spend log decoding verified with a synthetic AgentSpend log built from the contract ABI (no real spend events exist yet).
+- `bun run check` (oxlint + tsc): 0 errors, 0 warnings.
 
-**What was wrong:**
-- `useEffect(() => { addressRef.current = address; })` with no dep array ran after EVERY render
-- Combined with `useEffect(() => { if (address !== prevAddress.current) ... })` with no dep array
-- Both effects together created a render cascade: dispatch → re-render → effect runs → ref update → no-op but still re-registered
-- Prior attempts introduced `useReducer`, `useRef` patterns and a `useStableAddress` hook — all made things worse by violating `react(refs)` lint rules or introducing new no-dep-array effects
+## Known limits
+- Explorer log API reports a quota of 10 requests and returns 429 when exhausted. The app never polls it: spend logs are fetched only when a vault's on-chain `spentTotal` changes, and not at all while it is 0. If it returns 429 the UI shows an error and Refresh retries later.
+- The explorer returns at most 1000 logs per query. Above that the app falls back to one query per vault.
+- No end-to-end test of the full spend flow yet, because no agent has called `spend()` on the deployed contract.
+- The repo has no `build` script. Build with `bunx vite build`.
 
-**Final fix (this session):**
-- Rewrote `Dashboard.tsx`, `AgentVaults.tsx`, `SpendHistory.tsx` from scratch
-- Pattern: `useCallback(async () => { ... }, [address])` + `useEffect(() => { void load(); }, [address])`
-- `address` from wagmi `useAccount()` IS a stable string primitive — safe as a dep
-- No `useRef`, no no-dep-array effects, no `useReducer`
-- `txSuccess` effect in AgentVaults uses `[txSuccess, load]` deps with a `useRef` guard to prevent double-fire
-- `useStableAddress` hook reduced to a passthrough (not used by any component)
+## Next steps
+1. Fund a vault and perform a real `spend()` from the agent wallet, then confirm it appears in Spend History.
+2. Redeploy `dist/` to Netlify and disable the site's access protection if the URL should be public.
 
-**Evidence:** `console.jsonl` shows only `[vite] hot updated` debug messages, zero errors after fix
-
-### `formatAddress` crash — RESOLVED
-- `utils.ts`: Added null/undefined guard — `Cannot read properties of undefined (reading 'slice')` crash eliminated
-
-### Other fixes in this project (prior sessions)
-- Arc Dark design token drift corrected
-- `whenNotPaused` applied to `createVault`, `deposit`, `updatePolicy` in contract
-- API server 500 empty-body responses wrapped in try/catch
-- Indexer rate-limit backoff (60s on -32005)
-- Footer component added
-- Logo system (SpendryLogo SVG)
-- Wrong-chain banner in Layout
-- Wallet address display in sidebar
-
-## Current State
-- Lint: 0 errors, 0 warnings
-- TypeCheck: PASS
-- Vite dev server: running (PID 11198)
-- API server: running (PID 2693)
-- Indexer: running, rate-limited on public RPC (expected on testnet without proxy)
-
-## Known Limitations
-- Indexer uses public `rpc.testnet.arc.io` — rate-limited. Set `RPC_PROXY_BASE_URL`, `RPC_PROXY_TOKEN`, `RPC_PROXY_CHAINS=Arc_Testnet` for reliable indexing
-- `VITE_CONTRACT_ADDRESS` must be set in `.env` for frontend to interact with contract
-
-## Files Changed This Session
-- `src/components/Dashboard.tsx` — complete rewrite (loop fix)
-- `src/components/AgentVaults.tsx` — complete rewrite (loop fix)
-- `src/components/SpendHistory.tsx` — complete rewrite (loop fix)
-- `src/lib/utils.ts` — `formatAddress` null guard
-
-## Commands
-```bash
-# Start API server
-bun run server
-
-# Start frontend
-bun run dev
-
-# Lint + typecheck
-bun run check
-```
+## Documentation (added 2026-11-11)
+- `docs/` holds the project docs. `docs/public/{en,vi}` (6 pages each) is shown in the app at `/docs`; `docs/internal/` (English, developer/AI-agent) is never bundled or served. Index: `docs/README.md`.
+- Open items are listed in `docs/README.md` (default language and language persistence are TBD) and known issues in `docs/internal/quality-standards.md`.
